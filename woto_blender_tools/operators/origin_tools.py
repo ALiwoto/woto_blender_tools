@@ -239,9 +239,26 @@ class OriginToChildrenGeometryOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-def menu_func_set_origin(self, context: bpy.types.Context) -> None:
-    self.layout.separator()
-    self.layout.operator(
-        OriginToChildrenGeometryOperator.bl_idname,
-        text="Origin To Children Geometry",
-    )
+class WotoSetOriginMenu(bpy.types.Menu):
+    bl_label = "Set Origin"
+    bl_idname = "WOTO_MT_object_set_origin"
+
+    def draw(self, context: bpy.types.Context) -> None:
+        del context
+
+        layout = self.layout
+        if layout is None:
+            return
+
+        origin_set_operator = cast(Any, bpy.ops.object.origin_set)
+        enum_items = origin_set_operator.get_rna_type().properties["type"].enum_items
+
+        for item in enum_items:
+            op = layout.operator("object.origin_set", text=item.name)
+            op.type = item.identifier
+
+        layout.separator()
+        layout.operator(
+            OriginToChildrenGeometryOperator.bl_idname,
+            text="Origin To Children Geometry",
+        )
