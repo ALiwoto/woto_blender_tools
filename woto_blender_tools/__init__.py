@@ -1,5 +1,3 @@
-import bpy
-
 from . import operators, ui
 
 bl_info = {

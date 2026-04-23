@@ -10,6 +10,8 @@ class WotoPivotToolsPanel(bpy.types.Panel):
 
     def draw(self, context: bpy.types.Context) -> None:
         layout = self.layout
+        if layout is None:
+            return
 
         col = layout.column(align=True)
         col.label(text="Selected empties only")

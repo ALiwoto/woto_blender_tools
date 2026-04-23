@@ -1,1 +1,2 @@
 fake-bpy-module==20260423
+pyright==1.1.409

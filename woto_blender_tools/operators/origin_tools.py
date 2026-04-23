@@ -1,9 +1,16 @@
 from __future__ import annotations
 
-from typing import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Sequence
+from typing import Any, cast
 
 import bpy
 from mathutils import Vector
+
+OperatorResult = set[Any]
+
+
+def get_selected_objects(context: bpy.types.Context) -> tuple[bpy.types.Object, ...]:
+    return tuple(context.selected_objects or ())
 
 
 def iter_descendants(obj: bpy.types.Object) -> Iterator[bpy.types.Object]:
@@ -33,7 +40,8 @@ def evaluated_world_bbox_points(
     depsgraph: bpy.types.Depsgraph,
 ) -> list[Vector]:
     obj_eval = obj.evaluated_get(depsgraph)
-    return [obj_eval.matrix_world @ Vector(corner) for corner in obj_eval.bound_box]
+    corners = cast(Iterable[Sequence[float]], obj_eval.bound_box)
+    return [obj_eval.matrix_world @ Vector(corner) for corner in corners]
 
 
 def combined_bbox_center_world(
@@ -129,7 +137,10 @@ class OriginToChildrenGeometryOperator(bpy.types.Operator):
             (
                 'VERTEX_AVERAGE',
                 "Vertex Average",
-                "Slower but more exact: average of all descendant mesh vertices in world space",
+                (
+                    "Slower but more exact: average of all descendant mesh "
+                    "vertices in world space"
+                ),
             ),
         ],
         default='BOUNDING_BOX',
@@ -138,7 +149,8 @@ class OriginToChildrenGeometryOperator(bpy.types.Operator):
     skip_nested_selected: bpy.props.BoolProperty(
         name="Skip Nested Selected Empties",
         description=(
-            "If a selected empty has another selected empty above it in the hierarchy, skip it "
+            "If a selected empty has another selected empty above it in the "
+            "hierarchy, skip it "
             "to avoid double-processing"
         ),
         default=True,
@@ -146,7 +158,7 @@ class OriginToChildrenGeometryOperator(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context) -> bool:
-        return any(obj.type == 'EMPTY' for obj in context.selected_objects)
+        return any(obj.type == 'EMPTY' for obj in get_selected_objects(context))
 
     def draw(self, context: bpy.types.Context) -> None:
         layout = self.layout
@@ -156,9 +168,9 @@ class OriginToChildrenGeometryOperator(bpy.types.Operator):
         layout.prop(self, "center_mode")
         layout.prop(self, "skip_nested_selected")
 
-    def execute(self, context: bpy.types.Context):
+    def execute(self, context: bpy.types.Context) -> OperatorResult:
         selected_empties = [
-            obj for obj in context.selected_objects
+            obj for obj in get_selected_objects(context)
             if obj.type == 'EMPTY'
         ]
 
