@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# the zip files
+woto_blender_tools_*.zip
+woto_blender_tools.zip
+
 # Distribution / packaging
 .Python
 build/

@@ -239,7 +239,7 @@ class OriginToChildrenGeometryOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-def menu_func_object(self, context: bpy.types.Context) -> None:
+def menu_func_set_origin(self, context: bpy.types.Context) -> None:
     self.layout.separator()
     self.layout.operator(
         OriginToChildrenGeometryOperator.bl_idname,
